@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:3000
+
+### GET all adventurers
+GET {{baseUrl}}/adventurers
+
+###
+POST {{baseUrl}}/adventurers
+Content-Type: application/json
+
+{
+  "name": "Eldrinho",
+  "characterClass": "Necromante"
+}
