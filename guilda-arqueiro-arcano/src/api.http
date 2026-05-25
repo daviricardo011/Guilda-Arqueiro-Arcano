@@ -1,11 +1,40 @@
 @baseUrl = http://localhost:3000
 
+# MÓDULO AUTENTICAÇÃO #
+
+
+### POST register user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "emailTrês@email.com",
+  "password": "Abcefg123!",
+  "name": "Usuário Três"
+}
+
+
+### POST user login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "email@email.com",
+  "password": "Abcefg123!"
+}
+
+# MÓDULO AVENTUREIROS #
+
+
 ### GET all adventurers
 GET {{baseUrl}}/adventurers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUxMjNjODkxLTY1ZWUtNGUxNC04ZjA2LWYzYjgyNzIzYzMxYyIsInVzZXJuYW1lIjoiVXN1w6FyaW8gVW0iLCJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTc3OTY3ODA2MSwiZXhwIjoxNzc5Njc4MzYxfQ.Ssq4u18uLvlvdpDQYTI3dCKrqaFtUGsHSN5HUKOleaQ
 
-###
+
+### CREATE adventurer
 POST {{baseUrl}}/adventurers
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUxMjNjODkxLTY1ZWUtNGUxNC04ZjA2LWYzYjgyNzIzYzMxYyIsInVzZXJuYW1lIjoiVXN1w6FyaW8gVW0iLCJlbWFpbCI6ImVtYWlsQGVtYWlsLmNvbSIsImlhdCI6MTc3OTY3ODA2MSwiZXhwIjoxNzc5Njc4MzYxfQ.Ssq4u18uLvlvdpDQYTI3dCKrqaFtUGsHSN5HUKOleaQ
 
 {
   "name": "Eldrinho",

@@ -3,6 +3,9 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "./assets/vite.svg";
 import heroImg from "./assets/hero.png";
 import "./App.css";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { Login } from "./components/Login";
+import { Register } from "./components/Register";
 
 interface Adventurer {
   id: string;
@@ -38,28 +41,40 @@ const generateAdventurer = (index: number) => {
 
 const baseUrl = "http://localhost:3000";
 
-const fetchAdventurersData = async (): Promise<{ data: Adventurer[] }> => {
-  const response = await fetch(`${baseUrl}/adventurers`);
+const fetchAdventurersData = async (token: string | null): Promise<{ data: Adventurer[] }> => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${baseUrl}/adventurers`, { headers });
   return response.json();
 };
 
-function App() {
+function AppContent() {
   const [counter, setCounter] = useState<number>(0);
   const [adventurers, setAdventurers] = useState<Adventurer[]>([]);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const { token, isAuthenticated, logout } = useAuth();
 
   const getAdventurers = useCallback(async () => {
     try {
-      const response = await fetchAdventurersData();
+      const response = await fetchAdventurersData(token);
       setAdventurers(response.data);
     } catch (e) {
       console.error(e);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadInitialData = async () => {
       try {
-        const response = await fetchAdventurersData();
+        const response = await fetchAdventurersData(token);
         setAdventurers(response.data);
       } catch (e) {
         console.error(e);
@@ -67,16 +82,22 @@ function App() {
     };
 
     loadInitialData();
-  }, []);
+  }, [isAuthenticated, token]);
 
   const newAdventurer = async () => {
     try {
       const payload = generateAdventurer(counter);
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${baseUrl}/adventurers`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(payload),
       });
       setCounter((prev) => prev + 1);
@@ -95,6 +116,14 @@ function App() {
     }
   };
 
+  if (!isAuthenticated) {
+    return isLoginMode ? (
+      <Login onSwitchToRegister={() => setIsLoginMode(false)} />
+    ) : (
+      <Register onSwitchToLogin={() => setIsLoginMode(true)} />
+    );
+  }
+
   return (
     <>
       <section id="center">
@@ -107,13 +136,18 @@ function App() {
           <h1>AVENTUREIROS</h1>
           <p></p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => newAdventurer()}
-        >
-          Add aventureiro
-        </button>
+        <div className="controls">
+          <button
+            type="button"
+            className="counter"
+            onClick={() => newAdventurer()}
+          >
+            Add aventureiro
+          </button>
+          <button type="button" className="logout-btn" onClick={logout}>
+            Logout
+          </button>
+        </div>
         <div className="party-grid">
           {adventurers.map((a) => (
             <div key={a.id} className="adventurer-card">
@@ -134,6 +168,14 @@ function App() {
         </div>
       </section>
     </>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
