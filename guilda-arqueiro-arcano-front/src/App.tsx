@@ -41,63 +41,66 @@ const generateAdventurer = (index: number) => {
 
 const baseUrl = "http://localhost:3000";
 
-const fetchAdventurersData = async (token: string | null): Promise<{ data: Adventurer[] }> => {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-  
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${baseUrl}/adventurers`, { headers });
-  return response.json();
-};
-
 function AppContent() {
   const [counter, setCounter] = useState<number>(0);
   const [adventurers, setAdventurers] = useState<Adventurer[]>([]);
   const [isLoginMode, setIsLoginMode] = useState(true);
   const { token, isAuthenticated, logout } = useAuth();
 
+  const fetchWithAuth = useCallback(
+    async (input: RequestInfo, init?: RequestInit) => {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...((init?.headers as Record<string, string>) ?? {}),
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(input, { ...init, headers });
+
+      if (response.status === 401) {
+        logout();
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
+      return response;
+    },
+    [logout, token],
+  );
+
   const getAdventurers = useCallback(async () => {
     try {
-      const response = await fetchAdventurersData(token);
-      setAdventurers(response.data);
+      const response = await fetchWithAuth(`${baseUrl}/adventurers`);
+      const data = await response.json();
+      setAdventurers(data.data);
     } catch (e) {
       console.error(e);
     }
-  }, [token]);
+  }, [fetchWithAuth]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
     const loadInitialData = async () => {
       try {
-        const response = await fetchAdventurersData(token);
-        setAdventurers(response.data);
+        const response = await fetchWithAuth(`${baseUrl}/adventurers`);
+        const data = await response.json();
+        setAdventurers(data.data);
       } catch (e) {
         console.error(e);
       }
     };
 
     loadInitialData();
-  }, [isAuthenticated, token]);
+  }, [fetchWithAuth, isAuthenticated]);
 
   const newAdventurer = async () => {
     try {
       const payload = generateAdventurer(counter);
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-      
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${baseUrl}/adventurers`, {
+      const response = await fetchWithAuth(`${baseUrl}/adventurers`, {
         method: "POST",
-        headers,
         body: JSON.stringify(payload),
       });
       setCounter((prev) => prev + 1);

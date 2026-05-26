@@ -40,3 +40,30 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUxMjNjODkxL
   "name": "Eldrinho",
   "characterClass": "Necromante"
 }
+
+# MÓDULO QUEST #
+
+### GET all quests
+GET {{baseUrl}}/quest
+
+### GET quest by id
+GET {{baseUrl}}/quest/{{questId}}
+
+### POST create quest
+POST {{baseUrl}}/quest
+Content-Type: application/json
+
+{
+  "title": "Resgatar a princesa",
+  "description": "Levar a princesa de volta ao castelo",
+  "reward": 150.5
+}
+
+### GET quests by adventurer
+GET {{baseUrl}}/quest/adventurer/{{adventurerId}}
+
+### PATCH accept quest
+PATCH {{baseUrl}}/quest/{{questId}}/adventurer/{{adventurerId}}
+
+### PATCH complete quest
+PATCH {{baseUrl}}/quest/{{questId}}/

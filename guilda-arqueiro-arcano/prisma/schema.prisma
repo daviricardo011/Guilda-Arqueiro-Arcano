@@ -18,6 +18,7 @@ model Adventurer {
   level          Int      @default(1)
   gold           Float    @default(0.0)
   createdAt      DateTime @default(now())
+  quests         Quest[]
 }
 
 model User {
@@ -25,4 +26,20 @@ model User {
   email    String @unique
   password String
   name     String
+}
+
+enum QuestStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+}
+
+model Quest {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  reward       Float
+  status       QuestStatus @default(PENDING)
+  adventurerId String?
+  adventurer   Adventurer?  @relation(fields: [adventurerId], references: [id])
 }
